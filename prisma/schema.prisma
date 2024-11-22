@@ -1,0 +1,61 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Message {
+  id                            String   @id @default(uuid())
+  senderId                      String
+  receiverId                    String
+  createdAt                     DateTime @default(now())
+  updatedAt                     DateTime
+  content                       String
+  sent                          Boolean  @default(false)
+  delivered                     Boolean  @default(false)
+  read                          Boolean  @default(false)
+  User_Message_receiverIdToUser User     @relation("Message_receiverIdToUser", fields: [receiverId], references: [id])
+  User_Message_senderIdToUser   User     @relation("Message_senderIdToUser", fields: [senderId], references: [id])
+}
+
+model User {
+  id            String    @id @default(uuid())
+  email         String    @unique
+  name          String    @unique
+  image                               String?
+  emailVerified DateTime?
+  password                         String?
+  role                             String    @default("user")
+  accounts                         Account[]
+  friendIds                        String[]
+  requestSent                      String[]
+  requestReceived                  String[]
+  createdAt                        DateTime  @default(now())
+  updatedAt                        DateTime  @updatedAt
+  Message_Message_receiverIdToUser Message[] @relation("Message_receiverIdToUser")
+  Message_Message_senderIdToUser   Message[] @relation("Message_senderIdToUser")
+}
+
+model Account {
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([provider, providerAccountId])
+}
