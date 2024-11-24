@@ -52,7 +52,6 @@ export async function handleSignUp({ name, email, password, confirmPassword }: {
             return { success: false, message: "Invalid data." };
         }
 
-        // check if the email is already taken
         const existingUser = await prisma.user.findUnique({
             where: {
                 email,
@@ -63,7 +62,7 @@ export async function handleSignUp({ name, email, password, confirmPassword }: {
             return { success: false, message: "Email already exists. Login to continue." };
         }
 
-        // hash the password
+       
         const hashedPassword = await bcryptjs.hash(password, 10);
         await prisma.user.create({
             data: {
