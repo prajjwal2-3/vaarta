@@ -12,7 +12,7 @@ model Message {
   senderId                      String
   receiverId                    String
   createdAt                     DateTime @default(now())
-  updatedAt                     DateTime
+  updatedAt                     DateTime @updatedAt
   content                       String
   sent                          Boolean  @default(false)
   delivered                     Boolean  @default(false)
@@ -22,11 +22,11 @@ model Message {
 }
 
 model User {
-  id            String    @id @default(uuid())
-  email         String    @unique
-  name          String    @unique
-  image                               String?
-  emailVerified DateTime?
+  id                               String    @id @default(uuid())
+  email                            String    @unique
+  name                             String    @unique
+  image                            String?
+  emailVerified                    DateTime?
   password                         String?
   role                             String    @default("user")
   accounts                         Account[]
@@ -38,6 +38,8 @@ model User {
   Message_Message_receiverIdToUser Message[] @relation("Message_receiverIdToUser")
   Message_Message_senderIdToUser   Message[] @relation("Message_senderIdToUser")
 }
+
+
 
 model Account {
   userId            String

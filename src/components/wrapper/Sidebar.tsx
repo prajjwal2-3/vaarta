@@ -10,11 +10,12 @@ export default async function Sidebar() {
       id: true,
     },
   });
+
   return (
-    <div className="fixed p-4 min-h-screen w-[calc(20vw)] text-white border-r ">
+    <div className="fixed p-4 min-h-screen w-[calc(100vw/6)] text-white border-r ">
       <p className="font-semibold text-xl">Friends</p>
       <div className="grid gap-4 my-5 ">
-        {users.map((user) => (
+        {users.filter((user)=>user.id!==currentUser?.user.id).map((user) => (
           <ChatSelector user={user} currentUser={currentUser!}/>
         ))}
       </div>
