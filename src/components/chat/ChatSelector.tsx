@@ -3,19 +3,44 @@ import { useEffect, useState } from "react";
 import useUserStore from "@/store/chat.store";
 import Image from "next/image";
 import { DefaultSession } from "next-auth";
+import { useWebsocket } from "@/store/socket.store";
+import { OnlineUser } from "@/store/user.store";
 
 interface ChatSelectorProps {
   user: {
     id: string;
     name: string;
-    image: string | null;
+    roomImage: string | null;
+    roomType: "SINGLE" | "GROUP";
   };
   currentUser: DefaultSession;
 }
 
 export default function ChatSelector({ user, currentUser }: ChatSelectorProps) {
-  const { setUser,user:present } = useUserStore();
-
+  const { setRoom, room: present } = useUserStore();
+  const { ws, setws } = useWebsocket();
+  const { onlineUsers, setOnlineUsers } = OnlineUser();
+  useEffect(() => {
+    const socket = new WebSocket("ws://localhost:8000/chat");
+    setws(socket);
+    socket.onopen = () => {
+      console.log("connection to websocket done.");
+      const message = JSON.stringify({
+        type: "setMeOnline",
+        userId: currentUser.user?.id,
+      });
+      socket.send(message);
+    };
+    socket.onmessage = (message) => {
+      console.log(message.data);
+      const parsedMessage = JSON.parse(message.data);
+      switch (parsedMessage.type) {
+        case "onlineUsers":
+          setOnlineUsers(parsedMessage.users);
+          break;
+      }
+    };
+  }, []);
   const [isCurrentUser, setIsCurrentUser] = useState(false);
 
   useEffect(() => {
@@ -27,16 +52,18 @@ export default function ChatSelector({ user, currentUser }: ChatSelectorProps) {
   return (
     <div
       key={user.id}
-      onClick={() => setUser(user)}
-      className={`flex items-center gap-3 p-2 cursor-pointer rounded-lg ${present?.id===user.id && 'bg-foreground'} hover:bg-foreground transition-colors`}
+      onClick={() => setRoom(user)}
+      className={`flex items-center gap-3 p-2 cursor-pointer rounded-lg ${
+        present?.id === user.id && "bg-foreground"
+      } hover:bg-foreground transition-colors`}
     >
-      {user.image ? (
+      {user.roomImage ? (
         <div className="relative w-2/12">
           <Image
             width={40}
             height={40}
             className="rounded-full"
-            src={user.image}
+            src={user.roomImage}
             alt={`${user.name}'s profile`}
           />
         </div>

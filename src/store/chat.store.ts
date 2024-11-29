@@ -1,21 +1,22 @@
 import { create } from 'zustand';
 
-interface User {
-  image: string | null;
+interface Room {
+  roomImage: string | null;
   id: string;
   name: string;
 }
 
-interface UserStore {
-  user: User | null;
-  setUser: (user: User) => void;
-  clearUser: () => void;       
+interface RoomStore {
+  room: Room | null;
+  setRoom: (room: Room) => void;
+  clearRoom: () => void;       
 }
 
-const useUserStore = create<UserStore>((set) => ({
-  user: null,
-  setUser: (user) => set({ user }),   
-  clearUser: () => set({ user: null }), 
+const useRoomStore = create<RoomStore>((set) => ({
+  room: null,
+  setRoom: (room) => set({ room }),   
+  clearRoom: () => set({ room: null }), 
 }));
 
-export default useUserStore;
+export default useRoomStore;
+

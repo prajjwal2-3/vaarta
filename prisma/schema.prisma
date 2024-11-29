@@ -8,38 +8,35 @@ datasource db {
 }
 
 model Message {
-  id                            String   @id @default(uuid())
-  senderId                      String
-  receiverId                    String
-  createdAt                     DateTime @default(now())
-  updatedAt                     DateTime @updatedAt
-  content                       String
-  sent                          Boolean  @default(false)
-  delivered                     Boolean  @default(false)
-  read                          Boolean  @default(false)
-  User_Message_receiverIdToUser User     @relation("Message_receiverIdToUser", fields: [receiverId], references: [id])
-  User_Message_senderIdToUser   User     @relation("Message_senderIdToUser", fields: [senderId], references: [id])
+  id                          String   @id @default(uuid())
+  senderId                    String
+  createdAt                   DateTime @default(now())
+  updatedAt                   DateTime @updatedAt
+  content                     String
+  sent                        Boolean  @default(false)
+  delivered                   Boolean  @default(false)
+  read                        Boolean  @default(false)
+  roomId                      String
+  Room                        Room     @relation(fields: [roomId], references: [id])
+  User_Message_senderIdToUser User     @relation("Message_senderIdToUser", fields: [senderId], references: [id])
 }
 
 model User {
-  id                               String    @id @default(uuid())
-  email                            String    @unique
-  name                             String    @unique
-  image                            String?
-  emailVerified                    DateTime?
-  password                         String?
-  role                             String    @default("user")
-  accounts                         Account[]
-  friendIds                        String[]
-  requestSent                      String[]
-  requestReceived                  String[]
-  createdAt                        DateTime  @default(now())
-  updatedAt                        DateTime  @updatedAt
-  Message_Message_receiverIdToUser Message[] @relation("Message_receiverIdToUser")
-  Message_Message_senderIdToUser   Message[] @relation("Message_senderIdToUser")
+  id                             String    @id @default(uuid())
+  email                          String    @unique
+  friendIds                      String[]
+  requestSent                    String[]
+  requestReceived                String[]
+  createdAt                      DateTime  @default(now())
+  updatedAt                      DateTime  @updatedAt
+  emailVerified                  DateTime?
+  image                          String?
+  name                           String    @unique
+  password                       String?
+  role                           String    @default("user")
+  accounts                       Account[]
+  Message_Message_senderIdToUser Message[] @relation("Message_senderIdToUser")
 }
-
-
 
 model Account {
   userId            String
@@ -53,11 +50,27 @@ model Account {
   scope             String?
   id_token          String?
   session_state     String?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@id([provider, providerAccountId])
+}
+
+model Room {
+  id            String    @id
+  createdBy     String
+  roomType      roomTypes
+  users         String[]
+  lastMessageId String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime
+  name          String
+  Message       Message[]
+  roomImage     String?
+}
+
+enum roomTypes {
+  SINGLE
+  GROUP
 }
