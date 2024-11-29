@@ -5,7 +5,7 @@ import Image from "next/image";
 import { DefaultSession } from "next-auth";
 import { useWebsocket } from "@/store/socket.store";
 import { OnlineUser } from "@/store/user.store";
-
+import queryClient from "@/lib/queryClient";
 interface ChatSelectorProps {
   user: {
     id: string;
@@ -18,29 +18,7 @@ interface ChatSelectorProps {
 
 export default function ChatSelector({ user, currentUser }: ChatSelectorProps) {
   const { setRoom, room: present } = useUserStore();
-  const { ws, setws } = useWebsocket();
-  const { onlineUsers, setOnlineUsers } = OnlineUser();
-  useEffect(() => {
-    const socket = new WebSocket("ws://localhost:8000/chat");
-    setws(socket);
-    socket.onopen = () => {
-      console.log("connection to websocket done.");
-      const message = JSON.stringify({
-        type: "setMeOnline",
-        userId: currentUser.user?.id,
-      });
-      socket.send(message);
-    };
-    socket.onmessage = (message) => {
-      console.log(message.data);
-      const parsedMessage = JSON.parse(message.data);
-      switch (parsedMessage.type) {
-        case "onlineUsers":
-          setOnlineUsers(parsedMessage.users);
-          break;
-      }
-    };
-  }, []);
+  const isSingleRoom = user.roomType==='SINGLE'
   const [isCurrentUser, setIsCurrentUser] = useState(false);
 
   useEffect(() => {
@@ -58,14 +36,13 @@ export default function ChatSelector({ user, currentUser }: ChatSelectorProps) {
       } hover:bg-foreground transition-colors`}
     >
       {user.roomImage ? (
-        <div className="relative w-2/12">
-          <Image
-            width={40}
-            height={40}
-            className="rounded-full"
+        <div className="relative  w-2/12">
+        <div className="w-10 h-10 rounded-full border object-contain overflow-clip">
+        <img
             src={user.roomImage}
             alt={`${user.name}'s profile`}
           />
+        </div>
         </div>
       ) : (
         <div className="w-2/12">
@@ -76,7 +53,7 @@ export default function ChatSelector({ user, currentUser }: ChatSelectorProps) {
       )}
       <div className="flex  gap-2 w-fit relative">
         <p className="font-medium">
-          {user.name}{" "}
+          {user.name}
           {isCurrentUser && (
             <span className="text-muted-foreground">(You)</span>
           )}

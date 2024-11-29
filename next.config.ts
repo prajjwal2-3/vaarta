@@ -7,6 +7,10 @@ images:{
     {
       hostname:'lh3.googleusercontent.com',
       port:''
+    },
+    {
+      hostname:'api.dicebear.com',
+      port:''
     }
   ]
 }

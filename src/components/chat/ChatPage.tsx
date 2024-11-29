@@ -6,6 +6,8 @@ import { DefaultSession } from "next-auth";
 import { Button } from "../ui/button";
 import { useQuery } from "@tanstack/react-query";
 import { usersInRoom } from "@/actions/user.action";
+import { getMessages } from "@/actions/message.action";
+import { useWebsocket } from "@/store/socket.store";
 export default function ChatPage({
   currentUser,
 }: {
@@ -19,9 +21,15 @@ export default function ChatPage({
       if (!room?.id) return [];
       return await usersInRoom(room.id);
     },
-    enabled: !!room?.id, 
+    enabled: !!room?.id,
   });
-
+  const { data: message, isLoading: messageLoading } = useQuery({
+    queryKey: ["messages", room?.id],
+    queryFn: async () => {
+      if (!room?.id) return [];
+      return await getMessages(room.id);
+    },
+  });
   if (!room)
     return (
       <div className="h-[calc(100vh-80px)] flex items-center justify-center">
@@ -34,13 +42,9 @@ export default function ChatPage({
       <section className="p-2 border-b flex items-center gap-2 shadow-md z-10">
         {room.roomImage ? (
           <div className="relative">
-            <Image
-              width={40}
-              height={40}
-              className="rounded-full"
-              src={room.roomImage}
-              alt={`${room.name}'s profile`}
-            />
+            <div className="w-10 h-10 rounded-full border object-contain overflow-clip">
+              <img src={room.roomImage} alt={`${room.name}'s profile`} />
+            </div>
           </div>
         ) : (
           <div className="flex items-center justify-center h-10 w-10 bg-primary rounded-full text-white">
@@ -54,7 +58,9 @@ export default function ChatPage({
           ) : data && data.length > 0 ? (
             <div className="flex flex-row text-xs gap-2">
               {data.map((user) => (
-                <p key={user.id}>{user.name}</p>
+                <p key={user.id}>
+                  {user.name === currentUser.user?.name ? "You" : user.name}
+                </p>
               ))}
             </div>
           ) : (
@@ -62,7 +68,18 @@ export default function ChatPage({
           )}
         </div>
       </section>
-      <section className="flex-1"></section>
+      <section className="flex-1 p-4">
+        <div className="flex flex-col gap-4">
+          {message?.map((e) => (
+            <section key={e.id} className={e.senderId===currentUser.user?.id?'bg-primary p-2 rounded-lg w-fit ml-auto':'bg-foreground p-2 rounded-lg w-fit'}>
+              {e.content}
+            </section>
+          ))}
+          {
+            message?.length===0 && <div className="mx-auto text-white/50">No Conversation yet.</div>
+          }
+        </div>
+      </section>
       <section className="p-4 border-t flex gap-2 z-10">
         <Input placeholder="Type your message..." />
         <Button>Send</Button>
