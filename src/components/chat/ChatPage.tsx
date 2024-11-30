@@ -7,6 +7,7 @@ import { Button } from "../ui/button";
 import { useQuery } from "@tanstack/react-query";
 import { usersInRoom } from "@/actions/user.action";
 import { getMessages } from "@/actions/message.action";
+import { OnlineUser } from "@/store/user.store";
 import { useWebsocket } from "@/store/socket.store";
 export default function ChatPage({
   currentUser,
@@ -14,7 +15,7 @@ export default function ChatPage({
   currentUser: DefaultSession;
 }) {
   const { room } = useUserStore();
-
+   const { onlineUsers}=OnlineUser()
   const { data, isLoading } = useQuery({
     queryKey: ["usersInRoom", room?.id],
     queryFn: async () => {
@@ -42,9 +43,12 @@ export default function ChatPage({
       <section className="p-2 border-b flex items-center gap-2 shadow-md z-10">
         {room.roomImage ? (
           <div className="relative">
+            <div className="w-[8px] h-[8px] absolute  right-0 rounded-full bottom-1 bg-green-400"></div>
             <div className="w-10 h-10 rounded-full border object-contain overflow-clip">
-              <img src={room.roomImage} alt={`${room.name}'s profile`} />
+              <img src={room.roomImage} alt={`${room.name}'s profile`}  />
+              
             </div>
+            
           </div>
         ) : (
           <div className="flex items-center justify-center h-10 w-10 bg-primary rounded-full text-white">
@@ -54,7 +58,7 @@ export default function ChatPage({
         <div>
           <p className="font-semibold">{room.name}</p>
           {isLoading ? (
-            <p>Loading users...</p>
+            <p className="text-xs">Loading users...</p>
           ) : data && data.length > 0 ? (
             <div className="flex flex-row text-xs gap-2">
               {data.map((user) => (

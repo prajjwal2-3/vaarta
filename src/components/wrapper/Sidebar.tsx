@@ -3,6 +3,7 @@ import ChatSelector from "../chat/ChatSelector";
 import { auth } from "@/auth";
 import { NewChatDialog } from "./createRoom";
 import Rooms from "../chat/Rooms";
+import { ScrollArea } from "../ui/scroll-area";
 export default async function Sidebar() {
   const currentUser = await auth();
 
@@ -20,7 +21,9 @@ export default async function Sidebar() {
         <p className="font-semibold text-xl">Friends</p>
         <NewChatDialog users={users} currentUser={currentUser!}/>
       </div>
-      <Rooms currentUser={currentUser!}/>
+     <ScrollArea className="h-[80vh]">
+     <Rooms currentUser={currentUser!}/>
+     </ScrollArea>
       
     </div>
   );

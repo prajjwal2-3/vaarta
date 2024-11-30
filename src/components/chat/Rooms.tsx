@@ -8,6 +8,7 @@ import { useEffect } from "react";
 import { OnlineUser } from "@/store/user.store";
 import { useWebsocket } from "@/store/socket.store";
 import queryClient from "@/lib/queryClient";
+import { toast } from "sonner";
 export default function Rooms({
   currentUser,
 }: {
@@ -35,6 +36,7 @@ export default function Rooms({
             break;
           case "newRoom":
             queryClient.invalidateQueries({queryKey:['rooms']})
+            toast('Room has been created.')
         }
       };
     }, []);
