@@ -10,11 +10,12 @@ export async function getRooms(currentUser:DefaultSession){
         },
         select: {
           id: true,
-          name: true,
-          roomImage: true,
+          names: true,
           roomType: true,
+        roomImages:true,
+        createdBy:true,
+        users:true
         },
       });
-      console.log(rooms)
       return rooms
 }

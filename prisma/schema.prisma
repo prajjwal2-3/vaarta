@@ -65,9 +65,9 @@ model Room {
   lastMessageId String?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime
-  name          String
+  roomImages    String[]
+  names         String[]
   Message       Message[]
-  roomImage     String?
 }
 
 enum roomTypes {

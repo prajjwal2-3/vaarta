@@ -1,9 +1,12 @@
 import { create } from 'zustand';
 
 interface Room {
-  roomImage: string | null;
   id: string;
-  name: string;
+    names: string[];
+    roomImages: (string | null)[];
+    roomType: "SINGLE" | "GROUP";
+    createdBy: string;
+    users: string[];
 }
 
 interface RoomStore {

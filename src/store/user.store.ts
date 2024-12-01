@@ -8,15 +8,11 @@ interface typingUserStore {
     setTypingUsers: (users: string[]) => void
 }
 export const OnlineUser = create<onlineUserStore>((set) => ({
-    onlineUsers: [],
+  onlineUsers: [],
 
   setOnlineUsers: (newUsers) =>
-    set((state) => ({
-      onlineUsers: [
-        ...new Map(
-          [...state.onlineUsers, ...newUsers].map((user) => [user, user])
-        ).values(),
-      ],
+    set(() => ({
+      onlineUsers: [...new Set(newUsers)],
     })),
 }));
 
