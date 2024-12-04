@@ -18,7 +18,7 @@ export default function Rooms({
   const { onlineUsers, setOnlineUsers } = OnlineUser();
 
   useEffect(() => {
-    const socket = new WebSocket("ws://localhost:8000/chat");
+    const socket = new WebSocket("ws://chatapp.prajjwal.dev/chat");
     setws(socket);
 
     socket.onopen = () => {
@@ -44,7 +44,7 @@ export default function Rooms({
           toast("Room has been created.");
           break;
 
-        case "sendMessage":
+        case "newMessage":
           queryClient.setQueryData(
             ["messages", parsedMessage.newMessage.roomId],
             (oldMessages: any) => [...(oldMessages || []), parsedMessage.newMessage]

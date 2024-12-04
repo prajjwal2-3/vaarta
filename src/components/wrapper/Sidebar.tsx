@@ -6,7 +6,6 @@ import Rooms from "../chat/Rooms";
 import { ScrollArea } from "../ui/scroll-area";
 export default async function Sidebar() {
   const currentUser = await auth();
-
   const users = await prisma.user.findMany({
     select: {
       id: true,
@@ -14,17 +13,14 @@ export default async function Sidebar() {
       image: true,
     },
   });
- 
   return (
-    <div className="fixed p-4 min-h-screen w-[calc(100vw/6)] text-white border-r ">
+    <div className="fixed p-1 md:p-4 min-h-screen w-[calc(100vw/6)] text-white border-r ">
       <div>
-        <p className="font-semibold text-xl">Friends</p>
         <NewChatDialog users={users} currentUser={currentUser!}/>
       </div>
      <ScrollArea className="h-[80vh]">
      <Rooms currentUser={currentUser!}/>
      </ScrollArea>
-      
     </div>
   );
 }

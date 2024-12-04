@@ -69,6 +69,7 @@ export async function handleSignUp({ name, email, password, confirmPassword }: {
                 name,
                 email,
                 password: hashedPassword,
+                image:`https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(name)}`
             },
         });
 

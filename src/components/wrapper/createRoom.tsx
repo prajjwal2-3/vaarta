@@ -17,6 +17,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {Plus} from 'lucide-react'
 import {
   Form,
   FormControl,
@@ -73,6 +74,7 @@ export function NewChatDialog({
   });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
+    // if(values.groupName===''||values.friend===''||values.selectedUsers?.length===0) return
     console.log(values)
     if (values.chatType === "single") {
       const message = {
@@ -99,7 +101,13 @@ export function NewChatDialog({
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="outline">New Chat</Button>
+        <Button variant="outline" className="mx-auto">
+          <p className="flex items-center gap-2">
+
+            <span className="hidden lg:block">New Chat</span>
+            <Plus/>
+          </p>
+        </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px] max-w-[95%] rounded-lg">
         <DialogHeader>
@@ -153,7 +161,7 @@ export function NewChatDialog({
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent className="bg-foreground">
-                        {users.map((user) => (
+                        {[...users].filter((e)=>e.id!==currentUser?.user?.id).map((user) => (
                           <SelectItem
                             key={user.id}
                             value={user.id}
@@ -163,13 +171,14 @@ export function NewChatDialog({
                               <section>
                                 {user.image &&
                                 user.image.split("").length > 0 ? (
-                                  <div className="h-6 w-6 rounded-full">
+                                  <div className="h-6 w-6 rounded-full overflow-clip">
                                     <img
                                       src={
                                         user.image ||
                                         "https://api.dicebear.com/7.x/avataaars/svg?seed=Ayaan%20Sharma"
                                       }
                                       alt="b"
+                                      className=""
                                     />
                                   </div>
                                 ) : (
@@ -204,7 +213,7 @@ export function NewChatDialog({
                   )}
                 />
 
-                <Card>
+                <Card className="bg-transparent">
                   <CardHeader>
                     <CardTitle>Select Group Members</CardTitle>
                     <CardDescription>
@@ -213,7 +222,7 @@ export function NewChatDialog({
                   </CardHeader>
                   <CardContent>
                     <ScrollArea className="h-56 ">
-                      {users.map((user) => (
+                      {[...users].filter((e)=>e.id!==currentUser?.user?.id).map((user) => (
                         <div
                           key={user.id}
                           className="flex items-center space-x-2 mb-2"
