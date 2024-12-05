@@ -22,9 +22,9 @@ export default function Rooms({
 }) {
   const { ws, setws } = useWebsocket();
   const { onlineUsers, setOnlineUsers } = OnlineUser();
-
+  const isProd = process.env.NODE_ENV==="production"
   useEffect(() => {
-    const socket = new WebSocket("wss://chatapp.prajjwal.dev/chat");
+    const socket = new WebSocket(isProd?"wss://chatapp.prajjwal.dev/chat":"ws://localhost:8000/chat");
     setws(socket);
 
     socket.onopen = () => {

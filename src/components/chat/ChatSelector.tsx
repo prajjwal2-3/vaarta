@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import useUserStore from "@/store/chat.store";
 import { DefaultSession } from "next-auth";
+
 interface ChatSelectorProps {
   user: {
     id: string;
@@ -9,7 +10,7 @@ interface ChatSelectorProps {
     roomImages: (string | null)[];
     roomType: "SINGLE" | "GROUP";
     createdBy: string;
-    users:string[]
+    users: string[];
   };
   currentUser: DefaultSession;
 }
@@ -29,45 +30,51 @@ export default function ChatSelector({ user, currentUser }: ChatSelectorProps) {
     <div
       key={user.id}
       onClick={() => setRoom(user)}
-      className={`flex items-center md:gap-3 md:p-2 flex-col lg:flex-row justify-center cursor-pointer rounded-lg ${
-        present?.id === user.id && "bg-foreground"
-      } hover:bg-foreground transition-colors`}
+      className={`flex items-center gap-3 lg:p-3 cursor-pointer rounded-lg ${
+        present?.id === user.id ? "bg-foreground" : "hover:bg-foreground"
+      } transition-colors`}
     >
       {user.roomImages && user.roomImages.length > 0 ? (
-        <div className="relative lg:w-2/12">
-          <div className="w-10 h-10 rounded-full border object-contain overflow-clip">
-            <img
+        <div className="relative flex-shrink-0 w-12 h-12">
+          <img
             //@ts-ignore
-              src={
-                user.createdBy === currentUser?.user?.id
-                  ? user.roomImages[0] 
-                  : user.roomImages[1] 
-              }
-              alt={`${user.names[0]}'s profile`}
-            />
-          </div>
+            src={
+              user.createdBy === currentUser?.user?.id
+                ? user.roomImages[0]
+                : user.roomImages[1]
+            }
+            alt={`${user.names[0]}'s profile`}
+            className="w-full h-full rounded-full object-cover border"
+          />
         </div>
       ) : (
-        <div className="lg:w-2/12">
-          <div className="flex items-center justify-center h-10 w-10 bg-primary rounded-full text-white">
-            {user.names[0].charAt(0).toUpperCase()}
-          </div>
+        <div className="flex-shrink-0 flex items-center justify-center w-12 h-12 bg-primary rounded-full text-white">
+          {user.names[0].charAt(0).toUpperCase()}
         </div>
       )}
-
-      {
-        isSingleRoom?
-        <div className="md:flex hidden text-xs md:text-base gap-2 w-fit relative">
-        <p className="font-medium">
-          {user.createdBy === currentUser?.user?.id
-            ? user.names[0]
-            : user.names[1]}
+      <div className="lg:flex flex-col flex-grow hidden min-w-0">
+        <p
+          className="font-medium text-sm md:text-base truncate"
+          title={
+            isSingleRoom
+              ? user.createdBy === currentUser?.user?.id
+                ? user.names[0]
+                : user.names[1]
+              : user.names[0]
+          }
+        >
+          {isSingleRoom
+            ? user.createdBy === currentUser?.user?.id
+              ? user.names[0]
+              : user.names[1]
+            : user.names[0]}
         </p>
-      </div>:
-      <div className="text-xs md:flex hidden  md:text-base">
-        {user.names[0]}
+        {user.roomType === "GROUP" && (
+          <p className="text-xs text-gray-500 truncate">
+            {user.users.length} members
+          </p>
+        )}
       </div>
-      }
     </div>
   );
 }

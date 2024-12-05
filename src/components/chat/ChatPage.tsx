@@ -19,7 +19,7 @@ export default function ChatPage({
   const { onlineUsers } = OnlineUser();
   const [content, setContent] = useState("");
   const { ws } = useWebsocket();
-  const messageEndRef = useRef<HTMLDivElement>(null); 
+  const messageEndRef = useRef<HTMLDivElement>(null);
 
   const { data, isLoading } = useQuery({
     queryKey: ["usersInRoom", room?.id],
@@ -39,7 +39,7 @@ export default function ChatPage({
   });
 
   useEffect(() => {
-    scrollToBottom(); 
+    scrollToBottom();
   }, [room, message]);
 
   const scrollToBottom = () => {
@@ -53,7 +53,9 @@ export default function ChatPage({
       </div>
     );
 
-  const users = data?.map((e) => e.id).filter((p) => p !== currentUser.user?.id);
+  const users = data
+    ?.map((e) => e.id)
+    .filter((p) => p !== currentUser.user?.id);
   const participantImage = data
     ?.map((e) => e.image)
     .filter((p) => p !== currentUser.user?.image)[0];
@@ -61,9 +63,7 @@ export default function ChatPage({
 
   return (
     <div className="flex flex-col h-[calc(100vh-80px)]">
-     
       <section className="p-2 border-b flex items-center gap-2 shadow-md z-10">
-      
         {room.roomImages && room.roomImages.length > 0 ? (
           <div className="relative ">
             <div className="w-10 h-10 rounded-full border object-contain overflow-clip">
@@ -109,29 +109,39 @@ export default function ChatPage({
           )}
         </div>
       </section>
-
-
       <section className="flex-1 p-4 overflow-y-auto">
         <div className="flex flex-col gap-4">
-          {message?.map((e) => (
-            <section
-              key={e.id}
-              className={
-                e.senderId === currentUser.user?.id
-                  ? "bg-primary p-2 rounded-lg w-fit ml-auto"
-                  : "bg-foreground p-2 rounded-lg w-fit"
-              }
-            >
-              {e.content}
-            </section>
-          ))}
+          {message?.map((e) => {
+            const sender = data?.find((user) => user.id === e.senderId);
+            return (
+              <section
+                key={e.id}
+                className={
+                  e.senderId === currentUser.user?.id
+                    ? "bg-primary flex flex-col p-2 rounded-lg w-fit ml-auto"
+                    : "bg-foreground flex flex-col p-2 rounded-lg w-fit"
+                }
+              >
+                {room.roomType === "GROUP" && (
+                  <span className={
+                    e.senderId === currentUser.user?.id
+                      ? "text-xs text-white mb-1"
+                      : "text-xs text-gray-500 mb-1"
+                  }>
+                    {sender?.name || "Unknown User"}
+                  </span>
+                )}
+                <p>{e.content}</p>
+              </section>
+            );
+          })}
+          
           {message?.length === 0 && (
             <div className="mx-auto text-white/50">No Conversation yet.</div>
           )}
-          <div ref={messageEndRef} /> 
+          <div ref={messageEndRef} />
         </div>
       </section>
-
 
       <form
         className="p-4 border-t flex gap-2 z-10"

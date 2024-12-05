@@ -55,14 +55,14 @@ export default function SignUp() {
       }
     };
   return (
-    <div className="h-screen relative flex items-center  overflow-clip justify-center lg:justify-between p-20 gap-20">
+    <div className="h-screen relative flex items-center  overflow-clip justify-center lg:justify-between p-5 lg:p-20 gap-20">
       <div className="absolute w-[425px] h-[425px] bg-[#DCFF00] blur-[675px] top-[1100px] -left-[200px]"></div>
       <div className="absolute w-[425px] h-[725px] -top-[22px] blur-[675px] bg-[#846EE9] left-[1500px]"></div>
       <div className="blur-[675px] bg-[#846EE9] w-[425px] h-[425px] -top-[250px] -left-[290px] absolute"></div>
       
       <Card className="w-full mx-auto max-w-[529px]">
         <CardHeader>
-          <CardTitle className="text-2xl font-semibold text-center text-black">
+          <CardTitle className="text-2xl font-semibold text-center text-white">
             Create an account
           </CardTitle>
         </CardHeader>
@@ -108,7 +108,7 @@ export default function SignUp() {
             Already have an account?
             <Link
               href={"/auth/signin"}
-              className="text-black ml-2 hover:underline"
+              className="text-white ml-2 hover:underline"
             >
               Sign in
             </Link>

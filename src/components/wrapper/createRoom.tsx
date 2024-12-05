@@ -1,5 +1,4 @@
 "use client";
-
 import React, { useState } from "react";
 import {
   Dialog,
@@ -17,7 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {Plus} from 'lucide-react'
+import { Plus } from "lucide-react";
 import {
   Form,
   FormControl,
@@ -41,12 +40,14 @@ import {
 import { ScrollArea } from "../ui/scroll-area";
 import { useWebsocket } from "@/store/socket.store";
 import { DefaultSession } from "next-auth";
+import { toast } from "sonner";
 
 interface user {
   id: string;
   name: string;
   image: string | null;
 }
+
 const formSchema = z.object({
   chatType: z.enum(["single", "group"]),
   friend: z.string().optional(),
@@ -61,8 +62,10 @@ export function NewChatDialog({
   users: user[];
   currentUser: DefaultSession;
 }) {
+  const [isOpen, setIsOpen] = useState(false);
   const [chatType, setChatType] = useState<"single" | "group">("single");
   const { ws } = useWebsocket();
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -74,38 +77,45 @@ export function NewChatDialog({
   });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    // if(values.groupName===''||values.friend===''||values.selectedUsers?.length===0) return
-    console.log(values)
     if (values.chatType === "single") {
+      if (values.friend === "") {
+        toast("No friend selected");
+        return;
+      }
       const message = {
-        type:'createRoom',
+        type: "createRoom",
         createdBy: currentUser.user?.id,
-        users: [values.friend,currentUser.user?.id],
+        users: [values.friend, currentUser.user?.id],
         roomType: "SINGLE",
         name: "single",
       };
       ws?.send(JSON.stringify(message));
-    }else{
-      const message = {
-        type:'createRoom',
-        createdBy: currentUser.user?.id,
-        users:[...(values.selectedUsers||[]),currentUser.user?.id],
-        name:values.groupName,
-        roomType:'GROUP'
+    } else {
+      if (values.groupName === "" || values.selectedUsers?.length === 0) {
+        toast("No group name or users selected");
+        return;
       }
+      const message = {
+        type: "createRoom",
+        createdBy: currentUser.user?.id,
+        users: [...(values.selectedUsers || []), currentUser.user?.id],
+        name: values.groupName,
+        roomType: "GROUP",
+      };
       ws?.send(JSON.stringify(message));
     }
-   
+
+    toast.success("Chat created successfully!");
+    setIsOpen(false);
   }
 
   return (
-    <Dialog>
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
         <Button variant="outline" className="mx-auto">
           <p className="flex items-center gap-2">
-
             <span className="hidden lg:block">New Chat</span>
-            <Plus/>
+            <Plus />
           </p>
         </Button>
       </DialogTrigger>
@@ -161,36 +171,24 @@ export function NewChatDialog({
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent className="bg-foreground">
-                        {[...users].filter((e)=>e.id!==currentUser?.user?.id).map((user) => (
-                          <SelectItem
-                            key={user.id}
-                            value={user.id}
-                            className=""
-                          >
-                            <div className="flex items-center gap-2 ">
-                              <section>
-                                {user.image &&
-                                user.image.split("").length > 0 ? (
-                                  <div className="h-6 w-6 rounded-full overflow-clip">
-                                    <img
-                                      src={
-                                        user.image ||
-                                        "https://api.dicebear.com/7.x/avataaars/svg?seed=Ayaan%20Sharma"
-                                      }
-                                      alt="b"
-                                      className=""
-                                    />
-                                  </div>
-                                ) : (
-                                  <div className="bg-primary h-6 w-6 rounded-full flex items-center justify-center">
-                                    {user.name.charAt(0).toUpperCase()}
-                                  </div>
-                                )}
-                              </section>
-                              <p> {user.name}</p>
-                            </div>
-                          </SelectItem>
-                        ))}
+                        {users
+                          .filter((e) => e.id !== currentUser?.user?.id)
+                          .map((user) => (
+                            <SelectItem key={user.id} value={user.id}>
+                              <div className="flex items-center gap-2">
+                                <div className="h-6 w-6 rounded-full overflow-clip">
+                                  <img
+                                    src={
+                                      user.image ||
+                                      "https://api.dicebear.com/7.x/avataaars/svg?seed=User"
+                                    }
+                                    alt="User"
+                                  />
+                                </div>
+                                <p>{user.name}</p>
+                              </div>
+                            </SelectItem>
+                          ))}
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -212,7 +210,6 @@ export function NewChatDialog({
                     </FormItem>
                   )}
                 />
-
                 <Card className="bg-transparent">
                   <CardHeader>
                     <CardTitle>Select Group Members</CardTitle>
@@ -221,37 +218,36 @@ export function NewChatDialog({
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <ScrollArea className="h-56 ">
-                      {[...users].filter((e)=>e.id!==currentUser?.user?.id).map((user) => (
-                        <div
-                          key={user.id}
-                          className="flex items-center space-x-2 mb-2"
-                        >
-                          <Checkbox
-                            id={`user-${user.id}`}
-                            onCheckedChange={(checked) => {
-                              const currentUsers =
-                                form.getValues("selectedUsers") || [];
-                              const newUsers = checked
-                                ? [...currentUsers, user.id]
-                                : currentUsers.filter((id) => id !== user.id);
-                              form.setValue("selectedUsers", newUsers);
-                            }}
-                          />
-                          <label
-                            htmlFor={`user-${user.id}`}
-                            className="text-sm font-medium leading-none"
-                          >
-                            {user.name}
-                          </label>
-                        </div>
-                      ))}
+                    <ScrollArea className="h-56">
+                      {users
+                        .filter((e) => e.id !== currentUser?.user?.id)
+                        .map((user) => (
+                          <div key={user.id} className="flex items-center space-x-2 mb-2">
+                            <Checkbox
+                              id={`user-${user.id}`}
+                              onCheckedChange={(checked) => {
+                                const currentUsers = form.getValues(
+                                  "selectedUsers"
+                                ) || [];
+                                const newUsers = checked
+                                  ? [...currentUsers, user.id]
+                                  : currentUsers.filter((id) => id !== user.id);
+                                form.setValue("selectedUsers", newUsers);
+                              }}
+                            />
+                            <label
+                              htmlFor={`user-${user.id}`}
+                              className="text-sm font-medium"
+                            >
+                              {user.name}
+                            </label>
+                          </div>
+                        ))}
                     </ScrollArea>
                   </CardContent>
                 </Card>
               </>
             )}
-
             <Button type="submit" className="w-full">
               Create Chat
             </Button>
