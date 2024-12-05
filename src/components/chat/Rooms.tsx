@@ -24,7 +24,7 @@ export default function Rooms({
   const { onlineUsers, setOnlineUsers } = OnlineUser();
 
   useEffect(() => {
-    const socket = new WebSocket("ws://chatapp.prajjwal.dev/chat");
+    const socket = new WebSocket("wss://chatapp.prajjwal.dev/chat");
     setws(socket);
 
     socket.onopen = () => {
