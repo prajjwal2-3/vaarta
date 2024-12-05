@@ -56,7 +56,6 @@ export default function Rooms({
             (oldMessages: message[]) => [...(oldMessages || []), parsedMessage.newMessage]
           );
           break;
-
         default:
           break;
       }

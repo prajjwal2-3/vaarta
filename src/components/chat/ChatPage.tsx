@@ -3,13 +3,27 @@ import useUserStore from "@/store/chat.store";
 import { Input } from "../ui/input";
 import { DefaultSession } from "next-auth";
 import { Button } from "../ui/button";
-import { useQuery } from "@tanstack/react-query";
-import { usersInRoom } from "@/actions/user.action";
-import { getMessages } from "@/actions/message.action";
 import { OnlineUser } from "@/store/user.store";
 import { useWebsocket } from "@/store/socket.store";
 import { useEffect, useRef, useState } from "react";
-
+import queryClient from "@/lib/queryClient";
+import { useQuery } from "@tanstack/react-query";
+interface User {
+  id: string;
+  image: string | null;
+  name: string;
+}
+interface Message {
+  id: string;
+  createdAt: Date;
+  updatedAt: Date;
+  content: string;
+  senderId: string;
+  sent: boolean;
+  delivered: boolean;
+  read: boolean;
+  roomId: string;
+}
 export default function ChatPage({
   currentUser,
 }: {
@@ -20,24 +34,11 @@ export default function ChatPage({
   const [content, setContent] = useState("");
   const { ws } = useWebsocket();
   const messageEndRef = useRef<HTMLDivElement>(null);
-
-  const { data, isLoading } = useQuery({
-    queryKey: ["usersInRoom", room?.id],
-    queryFn: async () => {
-      if (!room?.id) return [];
-      return await usersInRoom(room.id);
-    },
-    enabled: !!room?.id,
-  });
-
-  const { data: message, isLoading: messageLoading } = useQuery({
+  const data = queryClient.getQueryData<User[]>(["usersInRoom", room?.id]);
+  const { data: message } = useQuery<Message[]>({
     queryKey: ["messages", room?.id],
-    queryFn: async () => {
-      if (!room?.id) return [];
-      return await getMessages(room.id);
-    },
   });
-
+  const isLoading = queryClient.getQueryState(["usersInRoom", room?.id]);
   useEffect(() => {
     scrollToBottom();
   }, [room, message]);
@@ -94,7 +95,7 @@ export default function ChatPage({
                 : room.names[1]
               : room.names[0]}
           </p>
-          {isLoading ? (
+          {!isLoading ? (
             <p className="text-xs">Loading users...</p>
           ) : data && data.length > 0 ? (
             <div className="flex flex-row text-xs gap-2">
@@ -123,11 +124,13 @@ export default function ChatPage({
                 }
               >
                 {room.roomType === "GROUP" && (
-                  <span className={
-                    e.senderId === currentUser.user?.id
-                      ? "text-xs text-white mb-1"
-                      : "text-xs text-gray-500 mb-1"
-                  }>
+                  <span
+                    className={
+                      e.senderId === currentUser.user?.id
+                        ? "text-xs text-white mb-1"
+                        : "text-xs text-gray-500 mb-1"
+                    }
+                  >
                     {sender?.name || "Unknown User"}
                   </span>
                 )}
@@ -135,7 +138,7 @@ export default function ChatPage({
               </section>
             );
           })}
-          
+
           {message?.length === 0 && (
             <div className="mx-auto text-white/50">No Conversation yet.</div>
           )}
