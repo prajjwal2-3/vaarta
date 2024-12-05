@@ -98,7 +98,7 @@ export default function ChatSelector({ user, currentUser }: ChatSelectorProps) {
               : user.names[1]
             : user.names[0]}
         </p>
-        <p className="text-xs text-gray-500 truncate">{lastMessage?.content}</p>
+        <p className="text-xs text-gray-500 truncate">{messageLoading?'loading...':lastMessage?.content}</p>
       </div>
     </div>
   );
