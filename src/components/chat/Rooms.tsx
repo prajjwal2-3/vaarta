@@ -8,7 +8,13 @@ import { OnlineUser } from "@/store/user.store";
 import { useWebsocket } from "@/store/socket.store";
 import queryClient from "@/lib/queryClient";
 import { toast } from "sonner";
-
+interface message {
+  id:string,
+  content:string,
+  senderId:string,
+  createdAt:Date,
+  roomId:string
+}
 export default function Rooms({
   currentUser,
 }: {
@@ -47,7 +53,7 @@ export default function Rooms({
         case "newMessage":
           queryClient.setQueryData(
             ["messages", parsedMessage.newMessage.roomId],
-            (oldMessages: any) => [...(oldMessages || []), parsedMessage.newMessage]
+            (oldMessages: message[]) => [...(oldMessages || []), parsedMessage.newMessage]
           );
           break;
 

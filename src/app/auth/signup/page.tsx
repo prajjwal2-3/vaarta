@@ -19,7 +19,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { signUpSchema } from "@/lib/zod";
 import { handleCredentialsSignin, handleSignUp } from "@/actions/authActions";
-import Image from "next/image";
+
 
 
 
@@ -51,6 +51,7 @@ export default function SignUp() {
         }
       } catch (error) {
         setGlobalError("An unexpected error occurred. Please try again.");
+        console.log(error)
       }
     };
   return (
