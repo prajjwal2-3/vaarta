@@ -2,11 +2,12 @@ import { auth } from "@/auth";
 import React from 'react'
 import Link from "next/link";
 import { Button } from "./ui/button";
+import { LogOut } from "lucide-react";
 import { handleSignOut } from "@/actions/authActions";
 export default async function LogoutButton() {
   const session = await auth();
   return (
-    <nav className="">
+    <div className="mx-auto">
             
             {!session ? (
                 <div className="flex gap-2 justify-center">
@@ -19,11 +20,12 @@ export default async function LogoutButton() {
                 </div>
             ) : (
                 <form action={handleSignOut}>
-                    <Button variant="default" type="submit">
-                        Sign Out
+                    <Button variant="default" type="submit" className="w-full">
+                        <LogOut/>
+                        <p className="hidden md:block">Sign Out</p>
                     </Button>
                 </form>
             )}
-        </nav>
+        </div>
   )
 }

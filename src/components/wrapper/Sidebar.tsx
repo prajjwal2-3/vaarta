@@ -1,9 +1,10 @@
 import prisma from "@/lib/db";
-import ChatSelector from "../chat/ChatSelector";
+import LogoutButton from "../Logout";
 import { auth } from "@/auth";
 import { NewChatDialog } from "./createRoom";
 import Rooms from "../chat/Rooms";
 import { ScrollArea } from "../ui/scroll-area";
+import UserSearchBar from "../wrapper/UserSearchBar";
 export default async function Sidebar() {
   const currentUser = await auth();
   const users = await prisma.user.findMany({
@@ -18,9 +19,11 @@ export default async function Sidebar() {
       <div>
         <NewChatDialog users={users} currentUser={currentUser!}/>
       </div>
+      {/* <UserSearchBar usernames={users.map((e)=>e.name)}/> */}
      <ScrollArea className="h-[80vh]">
      <Rooms currentUser={currentUser!}/>
      </ScrollArea>
+     <LogoutButton/>
     </div>
   );
 }

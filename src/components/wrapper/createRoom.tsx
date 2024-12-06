@@ -112,7 +112,7 @@ export function NewChatDialog({
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" className="mx-auto">
+        <Button variant="outline" className="mx-auto w-full bg-primary hover:bg-primary/80">
           <p className="flex items-center gap-2">
             <span className="hidden lg:block">New Chat</span>
             <Plus />

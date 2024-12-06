@@ -17,7 +17,7 @@ model Message {
   delivered                   Boolean  @default(false)
   read                        Boolean  @default(false)
   roomId                      String
-  Room                        Room     @relation(fields: [roomId], references: [id])
+  Room                        Room     @relation(fields: [roomId], references: [id], onDelete: Cascade)
   User_Message_senderIdToUser User     @relation("Message_senderIdToUser", fields: [senderId], references: [id])
 }
 
@@ -67,7 +67,7 @@ model Room {
   updatedAt     DateTime
   roomImages    String[]
   names         String[]
-  Message       Message[]
+  Message       Message[] 
 }
 
 enum roomTypes {

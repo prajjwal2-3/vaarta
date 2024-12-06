@@ -8,23 +8,26 @@ import { OnlineUser } from "@/store/user.store";
 import { useWebsocket } from "@/store/socket.store";
 import queryClient from "@/lib/queryClient";
 import { toast } from "sonner";
+
 interface message {
-  id:string,
-  content:string,
-  senderId:string,
-  createdAt:Date,
-  roomId:string
+  id: string;
+  content: string;
+  senderId: string;
+  createdAt: Date;
+  roomId: string;
 }
 export default function Rooms({
   currentUser,
 }: {
   currentUser: DefaultSession;
 }) {
-  const { ws, setws } = useWebsocket();
+  const { setws } = useWebsocket();
   const { onlineUsers, setOnlineUsers } = OnlineUser();
-  const isProd = process.env.NODE_ENV==="production"
+  const isProd = process.env.NODE_ENV === "production";
   useEffect(() => {
-    const socket = new WebSocket(isProd?"wss://chatapp.prajjwal.dev/chat":"ws://localhost:8000/chat");
+    const socket = new WebSocket(
+      isProd ? "wss://chatapp.prajjwal.dev/chat" : "ws://localhost:8000/chat"
+    );
     setws(socket);
 
     socket.onopen = () => {
@@ -53,7 +56,10 @@ export default function Rooms({
         case "newMessage":
           queryClient.setQueryData(
             ["messages", parsedMessage.newMessage.roomId],
-            (oldMessages: message[]) => [...(oldMessages || []), parsedMessage.newMessage]
+            (oldMessages: message[]) => [
+              ...(oldMessages || []),
+              parsedMessage.newMessage,
+            ]
           );
           break;
         default:
@@ -61,10 +67,12 @@ export default function Rooms({
       }
     };
 
-
     return () => {
       console.log("Closing WebSocket connection.");
-      if (socket.readyState === WebSocket.OPEN || socket.readyState === WebSocket.CONNECTING) {
+      if (
+        socket.readyState === WebSocket.OPEN ||
+        socket.readyState === WebSocket.CONNECTING
+      ) {
         socket.close();
       }
     };
@@ -78,16 +86,25 @@ export default function Rooms({
     },
     enabled: !!currentUser.user,
   });
-console.log(onlineUsers)
+  console.log(data);
   return (
     <div className="grid gap-4 my-5">
-      {isLoading && <div>Loading rooms...</div>}
+      {isLoading &&
+        [1, 2, 3, 4].map((e) => (
+          <div key={e} className="bg-foreground  w-full h-16 p-2 flex gap-5 items-center rounded-lg">
+            <div className="w-full lg:w-2/12">
+              <div className="w-10 h-10 bg-background animate-pulse rounded-full mx-auto lg:mr-auto my-auto"></div>
+            </div>
+            <div className="w-8/12 hidden lg:grid gap-2">
+              <div className="bg-background animate-pulse rounded-md w-full h-5"></div>
+              <div className="bg-background animate-pulse rounded-md w-9/12 h-3"></div>
+            </div>
+          </div>
+        ))}
       {data &&
-        data
-          .filter((user) => user.id !== currentUser?.user?.id)
-          .map((user) => (
-            <ChatSelector key={user.id} user={user} currentUser={currentUser} />
-          ))}
+        data.map((user) => (
+          <ChatSelector key={user.id} user={user} currentUser={currentUser} />
+        ))}
     </div>
   );
 }

@@ -7,7 +7,6 @@ interface userObj {
   image: string | null;
 }
 
-// Fetch user details
 export async function getUser(id: string): Promise<userObj | null> {
   const user = await prisma.user.findUnique({
     where: { id },
@@ -22,21 +21,21 @@ export async function getUser(id: string): Promise<userObj | null> {
 }
 
 export async function usersInRoom(roomId: string): Promise<userObj[]> {
-    // Fetch the room and retrieve the array of user IDs
+
     const room = await prisma.room.findUnique({
       where: { id: roomId },
-      select: { users: true }, // Assuming `users` is an array of user IDs
+      select: { users: true }, 
     });
   
     if (!room || !room.users || room.users.length === 0) {
-      return []; // Return empty array if room or users not found
+      return []; 
     }
   
-    // Fetch user details for all user IDs in one query
+
     const userInfo = await prisma.user.findMany({
       where: {
         id: {
-          in: room.users, // Use `in` to fetch all users in the array
+          in: room.users, 
         },
       },
       select: {

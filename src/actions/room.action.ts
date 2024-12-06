@@ -19,3 +19,11 @@ export async function getRooms(currentUser:DefaultSession){
       });
       return rooms
 }
+
+export async function deleteRoom(roomId:string){
+  await prisma.room.delete({
+    where:{
+      id:roomId
+    }
+  })
+}

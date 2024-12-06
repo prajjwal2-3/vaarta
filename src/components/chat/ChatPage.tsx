@@ -2,12 +2,26 @@
 import useUserStore from "@/store/chat.store";
 import { Input } from "../ui/input";
 import { DefaultSession } from "next-auth";
+import { Trash2Icon } from "lucide-react";
 import { Button } from "../ui/button";
 import { OnlineUser } from "@/store/user.store";
 import { useWebsocket } from "@/store/socket.store";
 import { useEffect, useRef, useState } from "react";
 import queryClient from "@/lib/queryClient";
 import { useQuery } from "@tanstack/react-query";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { deleteRoom } from "@/actions/room.action";
+import { toast } from "sonner";
 interface User {
   id: string;
   image: string | null;
@@ -29,7 +43,7 @@ export default function ChatPage({
 }: {
   currentUser: DefaultSession;
 }) {
-  const { room } = useUserStore();
+  const { room,setRoom ,clearRoom} = useUserStore();
   const { onlineUsers } = OnlineUser();
   const [content, setContent] = useState("");
   const { ws } = useWebsocket();
@@ -57,16 +71,13 @@ export default function ChatPage({
   const users = data
     ?.map((e) => e.id)
     .filter((p) => p !== currentUser.user?.id);
-  const participantImage = data
-    ?.map((e) => e.image)
-    .filter((p) => p !== currentUser.user?.image)[0];
   const isOnline = users?.some((user) => onlineUsers.includes(user));
 
   return (
-    <div className="flex flex-col h-[calc(100vh-80px)]">
+    <div className="flex flex-col h-screen">
       <section className="p-2 border-b flex items-center gap-2 shadow-md z-10">
         {room.roomImages && room.roomImages.length > 0 ? (
-          <div className="relative ">
+          <div className="relative">
             <div className="w-10 h-10 rounded-full border object-contain overflow-clip">
               <img
                 //@ts-ignore
@@ -109,6 +120,37 @@ export default function ChatPage({
             <p>No users in this room</p>
           )}
         </div>
+        <AlertDialog>
+          <AlertDialogTrigger className="ml-auto ">
+            <div className="cursor-pointer text-white/60 hover:text-white">
+              <Trash2Icon />
+            </div>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This action cannot be undone. This will permanently delete this
+                room and remove your data from our servers.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={async () => {
+                  await deleteRoom(room.id)
+                  queryClient.invalidateQueries({ queryKey: ["rooms"] });
+                  clearRoom()
+                  toast("Room deleted successfully")
+                }}
+                
+                className="bg-red-500 hover:bg-red-400"
+              >
+                Delete Room
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </section>
       <section className="flex-1 p-4 overflow-y-auto">
         <div className="flex flex-col gap-4">
