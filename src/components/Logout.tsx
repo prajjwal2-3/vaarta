@@ -7,7 +7,7 @@ import { handleSignOut } from "@/actions/authActions";
 export default async function LogoutButton() {
   const session = await auth();
   return (
-    <div className="mx-auto">
+    <div className="mx-auto ">
             
             {!session ? (
                 <div className="flex gap-2 justify-center">

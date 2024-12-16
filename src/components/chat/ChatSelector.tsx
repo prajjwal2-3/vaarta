@@ -14,6 +14,7 @@ interface ChatSelectorProps {
     roomType: "SINGLE" | "GROUP";
     createdBy: string;
     users: string[];
+    createdAt: Date;
   };
   currentUser: DefaultSession;
 }
@@ -75,7 +76,7 @@ export default function ChatSelector({ user, currentUser }: ChatSelectorProps) {
           )}
         </div>
       ) : (
-        <div className="flex-shrink-0 flex items-center justify-center w-12 h-12 bg-primary rounded-full text-white">
+        <div className="flex-shrink-0 mx-auto flex items-center justify-center w-12 h-12 bg-primary rounded-full text-white">
           {user.names[0].charAt(0).toUpperCase()}
         </div>
       )}

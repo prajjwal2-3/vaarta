@@ -2,7 +2,8 @@
 import useUserStore from "@/store/chat.store";
 import { Input } from "../ui/input";
 import { DefaultSession } from "next-auth";
-import { Trash2Icon } from "lucide-react";
+import { Trash2Icon, Info, Users } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "../ui/button";
 import { OnlineUser } from "@/store/user.store";
 import { useWebsocket } from "@/store/socket.store";
@@ -20,7 +21,14 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Separator } from "../ui/separator";
 import { deleteRoom } from "@/actions/room.action";
+import { format } from "date-fns";
 import { toast } from "sonner";
 interface User {
   id: string;
@@ -43,7 +51,7 @@ export default function ChatPage({
 }: {
   currentUser: DefaultSession;
 }) {
-  const { room,setRoom ,clearRoom} = useUserStore();
+  const { room, clearRoom } = useUserStore();
   const { onlineUsers } = OnlineUser();
   const [content, setContent] = useState("");
   const { ws } = useWebsocket();
@@ -120,37 +128,83 @@ export default function ChatPage({
             <p>No users in this room</p>
           )}
         </div>
-        <AlertDialog>
-          <AlertDialogTrigger className="ml-auto ">
-            <div className="cursor-pointer text-white/60 hover:text-white">
-              <Trash2Icon />
-            </div>
-          </AlertDialogTrigger>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-              <AlertDialogDescription>
-                This action cannot be undone. This will permanently delete this
-                room and remove your data from our servers.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction
-                onClick={async () => {
-                  await deleteRoom(room.id)
-                  queryClient.invalidateQueries({ queryKey: ["rooms"] });
-                  clearRoom()
-                  toast("Room deleted successfully")
-                }}
-                
-                className="bg-red-500 hover:bg-red-400"
-              >
-                Delete Room
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
+        <div className="ml-auto flex gap-2">
+          <AlertDialog>
+            <AlertDialogTrigger>
+              <div className="cursor-pointer text-white/60 hover:text-white">
+                <Trash2Icon />
+              </div>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This action cannot be undone. This will permanently delete
+                  this room and remove your data from our servers.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={async () => {
+                    if (
+                      room.createdBy !== currentUser?.user?.id &&
+                      room.roomType === "GROUP"
+                    ) {
+                      toast("Only Admin can delete group");
+                      return;
+                    }
+                    await deleteRoom(room.id);
+                    queryClient.invalidateQueries({ queryKey: ["rooms"] });
+                    clearRoom();
+                    toast("Room deleted successfully");
+                  }}
+                  className="bg-red-500 hover:bg-red-400"
+                >
+                  Delete Room
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+          <Popover>
+            {room.roomType === "GROUP" && (
+              <PopoverTrigger>
+                <Info />
+              </PopoverTrigger>
+            )}
+            <PopoverContent className="bg-foreground space-y-3 mr-2">
+              <div className="text-sm flex justify-between">
+                <p>Group members</p>
+                <div className="bg-primary/85 hover:bg-primary cursor-pointer text-xs flex gap-1 px-2 py-0.5 rounded-full w-fit">
+                  <Users size={14} />
+                  {room.users.length}
+                </div>
+              </div>
+              <Separator />
+              <div className="grid gap-2">
+                {[...(data ?? [])].reverse().map((e) => (
+                  <div key={e.id} className="flex gap-2 items-center">
+                    <img
+                      src={e.image!}
+                      alt=""
+                      className="w-6 h-6 rounded-full"
+                    />
+                    <p>{e.name}</p>
+                    {e.id === room.createdBy && (
+                      <Badge className="text-[9px] font-extralight rounded-full bg-red-700/40 text-red-500 py-[0px] px-2">
+                        Admin
+                      </Badge>
+                    )}
+                  </div>
+                ))}
+                <Separator />
+                <p className="text-sm text-white/60">
+                  Group created on {format(room.createdAt, "d MMMM, yyyy")}
+                </p>
+              </div>
+            </PopoverContent>
+          </Popover>
+        </div>
       </section>
       <section className="flex-1 p-4 overflow-y-auto">
         <div className="flex flex-col gap-4">

@@ -14,7 +14,8 @@ export async function getRooms(currentUser:DefaultSession){
           roomType: true,
         roomImages:true,
         createdBy:true,
-        users:true
+        users:true,
+        createdAt:true
         },
       });
       return rooms

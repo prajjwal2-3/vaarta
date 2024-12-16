@@ -7,6 +7,7 @@ interface Room {
     roomType: "SINGLE" | "GROUP";
     createdBy: string;
     users: string[];
+    createdAt: Date;
 }
 
 interface RoomStore {
